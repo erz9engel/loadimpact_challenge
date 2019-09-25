@@ -13,6 +13,12 @@ class DevopsCapacitySerializer(serializers.Serializer):
     DE_capacity = serializers.IntegerField(required=True, min_value=1)
     data_centers = serializers.ListField(child=DataCenterSerializer(), allow_empty=False)
 
+    def validate(self, attrs):
+        cities = [center['name'] for center in attrs['data_centers']]
+        if len(cities) != len(set(cities)):
+            raise serializers.ValidationError('Data center cities names must be unique.')
+        return attrs
+
     def calculate_load(self):
         de_capacity = self.validated_data['DE_capacity']
         dm_capacity = self.validated_data['DM_capacity']
